@@ -93,7 +93,7 @@ def main() :
 	tf_idf_vec = doc_pool
 
 	for key in doc_pool['1992-10-15.txt']:
-		print()
+		print("%s : %d"%(key,doc_pool['1992-10-15.txt'][key]))
 
 
 
