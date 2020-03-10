@@ -4,41 +4,56 @@ import math
 
 doc_pool = {}
 doc_total = {}
-
+tf_idf_vec = {}
+magnitude = {}
 def getidf(token) :
-	N = len(doc_names)
+	N = len(doc_pool)
 	df = 0
-	for doc in doc_pool:
-		if token in doc:
-			df+=1;
+	for doc in doc_pool.keys():
+		if token in doc_pool[doc]:
+			df+=1
 	if df == 0 :
-		return -1.0
+		return -1
 	return math.log( (N/df) ,10)
+
+
 
 def gettf(filename , token) :
 
-	if token in doc_pool[filename]:
-		return (1 + math.log(doc_pool[filename][token],10)
-	else:
+	if token in doc_pool[filename] :
+		return (1 + math.log(doc_pool[filename][token],10))
+	else :
 		return 0
 
+def find_magnitude():
 
-
-def getweight(filename , token) :
-
-
-
-
+	for file in doc_pool:
+		mag = 0
+		for key in doc_pool[file]:
+			mag += doc_pool[file][key]*doc_pool[file][key]
+			mag = math.sqrt(mag)
+		magnitude[file] = mag
 	return 0
 
 
+def getweight(filename , token) :
+	tf = gettf(filename,token)
+	idf = getidf(token)
+	if tf == 0:
+		return 0
+	else:
+		magnitude =0;
+		for key in doc_pool[filename]:
+			magnitude += doc_pool[filename][key]*doc_pool[filename][key]
+		magnitude = math.sqrt(magnitude)
+		return (tf*idf)/magnitude
 
 
 def query( qstring ) :
 
 
 
-	return 0;
+	return 0
 
 
 
@@ -54,7 +69,6 @@ def main() :
 
 	for filename in os.listdir(corpusroot):
 		file = open(os.path.join(corpusroot, filename), "r", encoding='UTF-8')
-		doc_names.append(filename)
 		doc = file.read()
 		file.close()
 		doc = doc.lower()
@@ -73,14 +87,47 @@ def main() :
 		doc_pool[filename] = filtered_dict
 		doc_total[filename] = counter
 
-	print("%15s : %10s \n"% ("Doc Name","Count"))
+	find_magnitude()
+
+	print(magnitude)
+	tf_idf_vec = doc_pool
+
+	for key in doc_pool['1992-10-15.txt']:
+		print()
 
 
-	for idx in range(0,30):
-		print("%15s : %10d \n"% (doc_names[idx],doc_total[idx]))
+
+
+	print("getidf:")
+	print("%.12f" % getidf("health"))
+
+	print("%.12f" % getidf("agenda"))
+
+	print("%.12f" % getidf("vector"))
+
+	print("%.12f" % getidf("reason"))
+
+
+	print("%.12f" % getidf("hispan"))
 
 
 	print("%.12f" % getidf("hispanic"))
+
+	print("getweight:")
+	print("%.12f" % getweight("2012-10-03.txt","health"))
+
+
+	print("%.12f" % getweight("1960-10-21.txt","reason"))
+
+
+	print("%.12f" % getweight("1976-10-22.txt","agenda"))
+
+
+	print("%.12f" % getweight("2012-10-16.txt","hispan"))
+
+
+	print("%.12f" % getweight("2012-10-16.txt","hispanic"))
+
 
 
 
