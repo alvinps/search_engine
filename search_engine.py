@@ -1,9 +1,14 @@
 import os
 import nltk
 import math
+import collections
+
+#doc_frequency = {}
+
+
 
 doc_pool = {}
-doc_total = {}
+doc_magnitude = {}
 tf_idf_vec = {}
 magnitude = {}
 nltk.download('stopwords')
@@ -31,33 +36,32 @@ def getidf(token) :
 def gettf(filename , token) :
 
 	if token in doc_pool[filename] :
+		#return 	doc_pool[filename][token] / doc_total[filename]
 		return (1 + math.log(doc_pool[filename][token],10))
 	else :
 		return 0
 #--------------------------------------------------
 
-def find_magnitude(token):
-
-	mag = 0
-	for file in doc_pool:
-		if token in doc_pool[file]:
-			mag += doc_pool[file][token]*doc_pool[file][token]
-
-	return math.sqrt(mag)
-
-#--------------------------------------------------
 
 def tfidf_vec_generator():
+
 	for file in doc_pool:
+		mag =0
 		tf_idf_vec[file] = {}
-
-	for file in doc_pool:
 		for token in doc_pool[file]:
-			for x in tf_idf_vec:
-				(tf_idf_vec[file])[token] = getweight(file , token)
+			tf_idf =(getidf(token)*gettf(file,token))
+			tf_idf_vec[file][token] = tf_idf
+			mag += tf_idf**2
+		doc_magnitude[file] = math.sqrt(mag)
 
+	return 0
+#--------------------------------------------------
 
+def normalize():
 
+	for file in tf_idf_vec:
+		for token in tf_idf_vec[file]:
+			tf_idf_vec[file][token] = tf_idf_vec[file][token]/ doc_magnitude[file]
 
 
 	return 0
@@ -71,21 +75,49 @@ def getweight(filename , token) :
 #--------------------------------------------------
 
 def query( qstring ) :
-	qstring = qstring.lower()
-	tokens = tokenizer.tokenize(qstring)
-	qvec = {}
-	for x in tokens:
-		stemmed = stemmer.stem(x)
-		if stemmed not in qvec:
-			qvec[stemmed] = 1
-		else:
-			qvec[stemmed] += 1
-
-
-
-
-
-
+	# qstring = qstring.lower()
+	# tokens = tokenizer.tokenize(qstring)
+	# qvec = {}
+	# N = 0
+	# for x in tokens:
+	# 	if x not in stop_words:
+	# 		N +=1
+	# 		stemmed = stemmer.stem(x)
+	# 		if stemmed not in qvec:
+	# 			qvec[stemmed] = 1
+	# 		else:
+	# 			qvec[stemmed] += 1
+	# mag = 0
+	# for x in qvec:
+	# 	qvec [x] = 1 + math.log(qvec[x] ,10)
+	# 	mag += qvec[x]*qvec[x]
+	#
+	# mag = math.sqrt(mag)
+	# for x in qvec:
+	# 	qvec [x] = qvec[x]/mag
+	#
+	# post_dict = {}
+	# for x in qvec:
+	# 	post_dict[x] = []
+	# 	ls = []
+	#
+	# 	if x in tf_idf_vec:
+	# 		for doc in tf_idf_vec[x]:
+	# 			if tf_idf_vec[x][doc] != 0:
+	# 				ls.append([doc,tf_idf_vec[x][doc]])
+	#
+	# 		sorted(ls,key = lambda z:float(z[1]) , reverse=True)
+	# 		if len(list) >=10 :
+	# 			post_dict[x] = ls[0:10]
+	# 		else:
+	# 			post_dict[x] = ls
+	# sim_score = []
+	# for file in doc_pool:
+	# 	case1 = True
+	# 	for term in qvec:
+	# 		all = False
+	#
+	#
 	return 0
 
 
@@ -100,19 +132,13 @@ def file_reader( corpusroot ) :
 		file.close()
 		doc = doc.lower()
 		tokens  = tokenizer.tokenize(doc)
-		filtered_dict = {}
-		counter = 0
-		for word in tokens:
-			if word not in stop_words:
-				counter+=1
-				stemmed = stemmer.stem(word)
-				if stemmed in filtered_dict:
-					filtered_dict[stemmed]+= 1
-				else:
-					filtered_dict[stemmed]= 1
+		stemmed_tokens = [stemmer.stem(token) for token in tokens if token not in stop_words]
+		#doc_frequency += collections.Counter(list(set(stemmed_tokens)))
 
-		doc_pool[filename] = filtered_dict
-		doc_total[filename] = counter
+		token_counter = collections.Counter(stemmed_tokens)
+		doc_pool[filename] = token_counter.copy()
+
+		token_counter.clear()
 
 
 	return 0
@@ -148,6 +174,13 @@ def test():
 
 	print("%.12f" % getweight("2012-10-16.txt","hispanic"))
 
+	print("query:")
+
+
+	#print("%.12f" % query("health insurance wall street"))
+
+
+
 	return 0
 
 #--------------------------------------------------
@@ -161,6 +194,8 @@ def main() :
 	file_reader( corpusroot )
 
 	tfidf_vec_generator()
+
+	normalize()
 
 	test()
 
