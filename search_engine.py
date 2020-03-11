@@ -2,6 +2,7 @@
 #	Alvin Poudel Sharma
 #	1001555230
 #
+#
 #----------------------------------------------
 # modules used
 import os
@@ -9,8 +10,6 @@ import nltk
 import math
 import collections
 import operator
-
-
 
 # raw data storage is done in doc_pool
 doc_pool = {}
@@ -111,7 +110,7 @@ def top_list_generator(qtoken_stemmed, cutoff) :
 def cosine_similarity(top_list , qtoken_stemmed) :
 	simdist ={}
 	least_imp =[]
-	# initialization 
+	# initialization
 	for term in top_list:
 		for doc in top_list[term]:
 			if doc not in simdist:
@@ -128,7 +127,6 @@ def cosine_similarity(top_list , qtoken_stemmed) :
 				simdist[doc] += top_list[term][doc]  * qtoken_stemmed[term]
 
 	return sorted(simdist.items(), key = operator.itemgetter(1), reverse = True) , least_imp
-
 
 
 #--------------------------------------------------
@@ -169,7 +167,6 @@ def query( qstring ) :
 	else:
 		return("fetch more",0)
 
-
 #--------------------------------------------------
 # reads all the data from the provided corpus and tokenizes abd stems it.
 # various stop words are also removed
@@ -190,7 +187,6 @@ def file_reader( corpusroot ) :
 		# raw data container
 
 		token_counter.clear()
-
 
 	return 0
 #--------------------------------------------------
@@ -223,8 +219,6 @@ def test():
 	return 0
 
 #--------------------------------------------------
-
-
 
 def main() :
 
